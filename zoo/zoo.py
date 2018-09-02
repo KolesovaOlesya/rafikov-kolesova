@@ -1,26 +1,88 @@
 from abc import ABC, abstractmethod
 
 
-class Zoo:
+class Zoo(object):
     zoos = []
     animals = []
+
+    @property
+    def all_animals(self):
+        return self
 
     def __init__(self, name):
         self.name = name
         Zoo.zoos.append(self)
 
-    def add_animal(self):
-        Zoo.animals.append(self)
+    def add_animal(self, animal):
+        if isinstance(animal, Feline) or isinstance(animal, Canine):
+            Zoo.animals.append(animal)
 
 
 class Animal:
     __metaclass__ = ABC
 
-    def __init__(self, name, age, zoo, habitat):
+    @abstractmethod
+    def sound(self):
+        pass
+
+
+class Feline(object):
+    def __init__(self, name, age, zoo, habitat, length_of_mustache):
         self.name = name
         self.age = age
         self.zoo = zoo
         self.habitat = habitat
+        self.length_of_mustache = length_of_mustache
+        self.family = "Feline"
+        Zoo.add_animal(self, animal=self)
+
+    def __setattr__(self, name, value):
+        if name == 'name':
+            if type(value) is not str:
+                raise TypeError("The name must be a string!")
+        elif name == 'age':
+            if type(value) is not int:
+                raise TypeError("Age must be a number!")
+        elif name == 'zoo':
+            if type(value) is not Zoo:
+                raise TypeError("Zoo must be a Zoo type!")
+        elif name == 'habitat':
+            if type(value) is not str:
+                raise TypeError("Habitat must be a string!")
+        elif name == 'length_of_mustache':
+            if type(value) is not int:
+                raise TypeError("Length of mustache must be a number!")
+        object.__setattr__(self, name, value)
+
+    def info(self):
+        print("\nFamily: " + self.family + '\n'
+              "name: " + self.name + '\n'
+              "age: " + str(self.age) + '\n'
+              "zoo: " + self.zoo.name + '\n'
+              "habitat: " + self.habitat + '\n'
+              "length_of_mustache: " + str(self.length_of_mustache) + '\n')
+
+    @classmethod
+    def get_kind(cls):
+        return cls.kind
+
+    def sound(self):
+        pass
+
+
+class Canine(object):
+    def __init__(self, name, age, zoo, habitat, length_of_tail):
+        self.name = name
+        self.age = age
+        self.zoo = zoo
+        self.habitat = habitat
+        self.length_of_tail = length_of_tail
+        self.family = "Canine"
+        Zoo.add_animal(self, animal=self)
+
+    @classmethod
+    def get_kind(cls):
+        return cls.kind
 
     def __setattr__(self, name, value):
         if name == 'name':
@@ -38,44 +100,13 @@ class Animal:
         elif name == 'length_of_tail':
             if type(value) is not int:
                 raise TypeError("Length of tail must be a number!")
-        elif name == 'length_of_mustache':
-            if type(value) is not int:
-                raise TypeError("Length of mustache must be a number!")
-        elif name == 'family':
-            if type(value) is not str:
-                raise TypeError("Family must be a string!")
         object.__setattr__(self, name, value)
 
-    @abstractmethod
-    def sound(self):
-        pass
-
-
-class Feline(Animal, Zoo):
-    def __init__(self, name, age, zoo, habitat, length_of_mustache):
-        super().__init__(name, age, zoo, habitat)
-        self.length_of_mustache = length_of_mustache
-        self.family = "Feline"
-        Zoo.add_animal(self)
-
-    def info(self):
-        print("\nFamily: " + self.family + '\n'
-              "name: " + self.name + '\n'
-              "age: " + str(self.age) + '\n'
-              "zoo: " + self.zoo.name + '\n'
-              "habitat: " + self.habitat + '\n'
-              "length_of_mustache: " + str(self.length_of_mustache) + '\n')
-
-    def sound(self):
-        pass
-
-
-class Canine(Animal, Zoo):
-    def __init__(self, name, age, zoo, habitat, length_of_tail):
-        super().__init__(name, age, zoo, habitat)
-        self.length_of_tail = length_of_tail
-        self.family = "Canine"
-        Zoo.add_animal(self)
+    def __getattribute__(self, item):
+        if item == "name":
+            return str(self.get_kind() + self.name + self.zoo.name)
+        else:
+            return object.__getattribute__(self, item)
 
     def info(self):
         print("\nFamily: " + self.family + '\n'
@@ -89,35 +120,35 @@ class Canine(Animal, Zoo):
         pass
 
 
-class Tiger(Feline, Zoo):
+class Tiger(Feline):
     kind = "tiger"
 
     def sound(self):
         print(self.name + " say: growl")
 
 
-class Cat(Feline, Zoo):
+class Cat(Feline):
     kind = "cat"
 
     def sound(self):
         print(self.name + " say: meow")
 
 
-class Lion(Feline, Zoo):
+class Lion(Feline):
     kind = "lion"
 
     def sound(self):
         print(self.name + " say: roar")
 
 
-class Fox(Canine, Zoo):
+class Fox(Canine):
     kind = "fox"
 
     def sound(self):
         print(self.name + " say: snorting")
 
 
-class Wolf(Canine, Zoo):
+class Wolf(Canine):
     kind = "wolf"
 
     def sound(self):
@@ -155,3 +186,5 @@ zoo1_animals = [animal for animal in animals if animal.zoo.name == zoo1.name]
 print("\n" + zoo1.name + " animals: ")
 for zoo1_animal in zoo1_animals:
     print(zoo1_animal.name)
+
+print(fox.name)
