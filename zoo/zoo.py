@@ -5,10 +5,6 @@ class Zoo(object):
     zoos = []
     animals = []
 
-    @property
-    def all_animals(self):
-        return self
-
     def __init__(self, name):
         self.name = name
         Zoo.zoos.append(self)
