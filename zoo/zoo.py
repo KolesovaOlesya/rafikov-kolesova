@@ -9,6 +9,11 @@ class Zoo(object):
         self.name = name
         Zoo.zoos.append(self)
 
+    @property
+    def all_zoo_animals(self):
+        zoo_animals = [animal for animal in self.animals if animal.zoo.name == self.name]
+        return zoo_animals
+
     def add_animal(self, animal):
         if isinstance(animal, Feline) or isinstance(animal, Canine):
             Zoo.animals.append(animal)
@@ -30,7 +35,7 @@ class Feline(object):
         self.habitat = habitat
         self.length_of_mustache = length_of_mustache
         self.family = "Feline"
-        Zoo.add_animal(self, animal=self)
+        Zoo.add_animal(zoo, animal=self)
 
     def __setattr__(self, name, value):
         if name == 'name':
@@ -50,9 +55,15 @@ class Feline(object):
                 raise TypeError("Length of mustache must be a number!")
         object.__setattr__(self, name, value)
 
+    def __getattribute__(self, item):
+        if item == "name":
+            return str(self.get_kind() + " " + object.__getattribute__(self, item) + " from zoo " + self.zoo.name)
+        else:
+            return object.__getattribute__(self, item)
+
     def info(self):
         print("\nFamily: " + self.family + '\n'
-              "name: " + self.name + '\n'
+              "name: " + object.__getattribute__(self, "name") + '\n'
               "age: " + str(self.age) + '\n'
               "zoo: " + self.zoo.name + '\n'
               "habitat: " + self.habitat + '\n'
@@ -74,7 +85,7 @@ class Canine(object):
         self.habitat = habitat
         self.length_of_tail = length_of_tail
         self.family = "Canine"
-        Zoo.add_animal(self, animal=self)
+        Zoo.add_animal(zoo, animal=self)
 
     @classmethod
     def get_kind(cls):
@@ -100,13 +111,13 @@ class Canine(object):
 
     def __getattribute__(self, item):
         if item == "name":
-            return str(self.get_kind() + self.name + self.zoo.name)
+            return str(self.get_kind() + " " + object.__getattribute__(self, item) + " from zoo " + self.zoo.name)
         else:
             return object.__getattribute__(self, item)
 
     def info(self):
         print("\nFamily: " + self.family + '\n'
-              "name: " + self.name + '\n'
+              "name: " + object.__getattribute__(self, "name") + '\n'
               "age: " + str(self.age) + '\n'
               "zoo: " + self.zoo.name + '\n'
               "habitat: " + self.habitat + '\n'
@@ -176,11 +187,12 @@ print("\nAll zoos: ")
 for zoo in zoos:
     print(zoo.name)
 
-animals = Zoo.animals
-zoo1_animals = [animal for animal in animals if animal.zoo.name == zoo1.name]
+zoo1_animals = zoo1.all_zoo_animals
 
 print("\n" + zoo1.name + " animals: ")
 for zoo1_animal in zoo1_animals:
-    print(zoo1_animal.name)
-
+    print(object.__getattribute__(zoo1_animal, "name"))
+print("\n")
 print(fox.name)
+print(wolf2.zoo.name)
+print(tiger.name)
