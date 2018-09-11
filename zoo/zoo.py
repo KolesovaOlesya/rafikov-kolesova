@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import re
+
 
 class Zoo(object):
     zoos = []
@@ -27,39 +29,72 @@ class Animal:
         pass
 
 
+class FelineAgeDescriptor(object):
+    def __init__(self):
+        self.age = None
+
+    def __set__(self, instance, value):
+        if type(value) is not int:
+            raise TypeError("Age must be a number!")
+        if value <= 0:
+            raise ValueError("Age must be greater than 0!")
+        self.age = value
+
+    def __get__(self, instance, owner):
+        return self.age
+
+
+class NameDescriptor(object):
+    def __init__(self):
+        self.name = None
+
+    def __set__(self, instance, value):
+        if type(value) is not str:
+            raise TypeError("The name must be a string!")
+        if not re.search('[a-zA-Z]', value):
+            raise TypeError("The name must be a letter!")
+        self.name = value
+
+    def __get__(self, instance, owner):
+        return str(instance.get_kind() + " " + self.name + " from zoo " + instance.zoo.name)
+
+
+class HabitatDescriptor(object):
+    def __init__(self):
+        self.habitat = None
+
+    def __set__(self, instance, value):
+        if type(value) is not str:
+            raise TypeError("Habitat must be a string!")
+        self.habitat = value
+
+    def __get__(self, instance, owner):
+        return self.habitat
+
+
+class LengthDescriptor(object):
+    def __init__(self):
+        self.length = None
+
+    def __set__(self, instance, value):
+        if type(value) is not int:
+            raise TypeError("Length of tail must be a number!")
+        self.length = value
+
+    def __get__(self, instance, owner):
+        return self.length
+
+
 class Feline(object):
-    def __init__(self, name, age, zoo, habitat, length_of_mustache):
-        self.name = name
-        self.age = age
+    def __init__(self, zoo):
         self.zoo = zoo
-        self.habitat = habitat
-        self.length_of_mustache = length_of_mustache
         self.family = "Feline"
         Zoo.add_animal(zoo, animal=self)
 
-    def __setattr__(self, name, value):
-        if name == 'name':
-            if type(value) is not str:
-                raise TypeError("The name must be a string!")
-        elif name == 'age':
-            if type(value) is not int:
-                raise TypeError("Age must be a number!")
-        elif name == 'zoo':
-            if type(value) is not Zoo:
-                raise TypeError("Zoo must be a Zoo type!")
-        elif name == 'habitat':
-            if type(value) is not str:
-                raise TypeError("Habitat must be a string!")
-        elif name == 'length_of_mustache':
-            if type(value) is not int:
-                raise TypeError("Length of mustache must be a number!")
-        object.__setattr__(self, name, value)
-
-    def __getattribute__(self, item):
-        if item == "name":
-            return str(self.get_kind() + " " + object.__getattribute__(self, item) + " from zoo " + self.zoo.name)
-        else:
-            return object.__getattribute__(self, item)
+    age = FelineAgeDescriptor()
+    name = NameDescriptor()
+    habitat = HabitatDescriptor()
+    length_of_mustache = LengthDescriptor()
 
     def info(self):
         print("\nFamily: " + self.family + '\n'
@@ -78,47 +113,40 @@ class Feline(object):
 
 
 class Canine(object):
-    def __init__(self, name, age, zoo, habitat, length_of_tail):
-        self.name = name
-        self.age = age
+    def __init__(self, zoo):
+        self._age = None
         self.zoo = zoo
-        self.habitat = habitat
-        self.length_of_tail = length_of_tail
         self.family = "Canine"
         Zoo.add_animal(zoo, animal=self)
+
+    name = NameDescriptor()
+    habitat = HabitatDescriptor()
+    length_of_tail = LengthDescriptor()
 
     @classmethod
     def get_kind(cls):
         return cls.kind
 
-    def __setattr__(self, name, value):
-        if name == 'name':
-            if type(value) is not str:
-                raise TypeError("The name must be a string!")
-        elif name == 'age':
-            if type(value) is not int:
-                raise TypeError("Age must be a number!")
-        elif name == 'zoo':
-            if type(value) is not Zoo:
-                raise TypeError("Zoo must be a Zoo type!")
-        elif name == 'habitat':
-            if type(value) is not str:
-                raise TypeError("Habitat must be a string!")
-        elif name == 'length_of_tail':
-            if type(value) is not int:
-                raise TypeError("Length of tail must be a number!")
-        object.__setattr__(self, name, value)
+    @property
+    def age(self):
+        return self._age
 
-    def __getattribute__(self, item):
-        if item == "name":
-            return str(self.get_kind() + " " + object.__getattribute__(self, item) + " from zoo " + self.zoo.name)
-        else:
-            return object.__getattribute__(self, item)
+    @age.setter
+    def age(self, value):
+        if type(value) is not int:
+            raise TypeError("Age must be a number!")
+        if value <= 0:
+            raise ValueError("Age must be greater than 0!")
+        self._age = value
+
+    @age.getter
+    def age(self):
+        return self._age
 
     def info(self):
         print("\nFamily: " + self.family + '\n'
               "name: " + object.__getattribute__(self, "name") + '\n'
-              "age: " + str(self.age) + '\n'
+              "age: " + str(self._age) + '\n'
               "zoo: " + self.zoo.name + '\n'
               "habitat: " + self.habitat + '\n'
               "length_of_tail: " + str(self.length_of_tail) + '\n')
@@ -165,22 +193,34 @@ class Wolf(Canine):
 zoo1 = Zoo("Aquarium")
 zoo2 = Zoo("Sequoia")
 
-tiger = Tiger("Hellman", 10, zoo1, "India", 14)
-cat = Cat("Jenniffer", 4, zoo1, "Russia", 5)
-lion = Lion("Leo", 9, zoo1, "East Africa", 12)
-fox = Fox("Evanski", 2, zoo1, "North Africa", 30)
-wolf = Wolf("Kurtis", 6, zoo1, "Spain", 29)
+tiger = Tiger(zoo1)
+fox = Fox(zoo1)
+wolf = Wolf(zoo1)
 
-tiger2 = Tiger("Demetrius", 20, zoo2, "China", 16)
-cat2 = Cat("Bagira", 8, zoo2, "South America", 7)
-lion2 = Lion("Sammie", 12, zoo2, "India", 13)
-fox2 = Fox("Ismael", 5, zoo2, "South China", 56)
-wolf2 = Wolf("Will", 8, zoo2, "Russia", 50)
+tiger2 = Tiger(zoo2)
+
+tiger.age = 10
+tiger.name = "Hellman"
+tiger.habitat = "India"
+tiger.length_of_mustache = 14
+print(tiger.age)
+print(tiger.name)
+print(tiger.habitat)
+print(tiger.length_of_mustache)
+fox.age = 5
+fox.name = "Evanski"
+fox.habitat = "North Africa"
+fox.length_of_tail = 30
+wolf.age = 6
+wolf.name = "Kurtis"
+wolf.habitat = "Spain"
+wolf.length_of_tail = 29
+tiger2.age = 20
+tiger2.name = "Demetrius"
+tiger2.habitat = "China"
+tiger2.length_of_mustache = 16
 
 wolf.info()
-wolf2.info()
-lion2.sound()
-cat.sound()
 
 zoos = Zoo.zoos
 print("\nAll zoos: ")
@@ -191,8 +231,10 @@ zoo1_animals = zoo1.all_zoo_animals
 
 print("\n" + zoo1.name + " animals: ")
 for zoo1_animal in zoo1_animals:
-    print(object.__getattribute__(zoo1_animal, "name"))
+    print(zoo1_animal.name)
 print("\n")
 print(fox.name)
-print(wolf2.zoo.name)
 print(tiger.name)
+
+tiger.info()
+fox.info()
