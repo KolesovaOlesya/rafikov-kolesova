@@ -34,7 +34,7 @@ class FelineAgeDescriptor(object):
         self.age = None
 
     def __set__(self, instance, value):
-        if type(value) is not int:
+        if not isinstance(value, int):
             raise TypeError("Age must be a number!")
         if value <= 0:
             raise ValueError("Age must be greater than 0!")
@@ -49,7 +49,7 @@ class NameDescriptor(object):
         self.name = None
 
     def __set__(self, instance, value):
-        if type(value) is not str:
+        if not isinstance(value, str):
             raise TypeError("The name must be a string!")
         if not re.search('[a-zA-Z]', value):
             raise TypeError("The name must be a letter!")
@@ -64,7 +64,7 @@ class HabitatDescriptor(object):
         self.habitat = None
 
     def __set__(self, instance, value):
-        if type(value) is not str:
+        if not isinstance(value, str):
             raise TypeError("Habitat must be a string!")
         self.habitat = value
 
@@ -77,7 +77,7 @@ class LengthDescriptor(object):
         self.length = None
 
     def __set__(self, instance, value):
-        if type(value) is not int:
+        if not isinstance(value, int):
             raise TypeError("Length of tail must be a number!")
         self.length = value
 
@@ -133,7 +133,7 @@ class Canine(object):
 
     @age.setter
     def age(self, value):
-        if type(value) is not int:
+        if not isinstance(value, int):
             raise TypeError("Age must be a number!")
         if value <= 0:
             raise ValueError("Age must be greater than 0!")
