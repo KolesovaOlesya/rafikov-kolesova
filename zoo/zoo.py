@@ -133,7 +133,7 @@ class Canine(object):
 
     @age.setter
     def age(self, value):
-        if not isinstance(value, int):
+        if type(value) is not int:
             raise TypeError("Age must be a number!")
         if value <= 0:
             raise ValueError("Age must be greater than 0!")
@@ -190,8 +190,43 @@ class Wolf(Canine):
         print(self.name + " say: howl")
 
 
+def stuff_constructor(self, name, age, zoo):
+    self.name = name
+    self.age = age
+    self.zoo = zoo
+
+
+def stuff_zoo(self):
+    print('I work at the zoo ' + self.zoo.name)
+
+
+def __setattr__(self, key, value):
+    if key == 'name':
+        if not isinstance(value, str):
+            raise TypeError("The name must be a string!")
+        if not re.search('[a-zA-Z]', value):
+            raise TypeError("The name must be a letter!")
+    elif key == 'age':
+        if not isinstance(value, int):
+            raise TypeError("Age must be a number!")
+        if value <= 0:
+            raise ValueError("Age must be greater than 0!")
+    elif key == 'zoo':
+        if not isinstance(value, Zoo):
+            raise TypeError("Invalid entered zoo!")
+    object.__setattr__(self, key, value)
+
+
+Stuff = type('Stuff', (object,), {'__init__': stuff_constructor,
+                                  'zoo_name': stuff_zoo,
+                                  '__setattr__': __setattr__})
+
 zoo1 = Zoo("Aquarium")
 zoo2 = Zoo("Sequoia")
+
+stuff1 = Stuff('Alex', 30, zoo1)
+print(stuff1.name)
+stuff1.zoo_name()
 
 tiger = Tiger(zoo1)
 fox = Fox(zoo1)
