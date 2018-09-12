@@ -133,7 +133,7 @@ class Canine(object):
 
     @age.setter
     def age(self, value):
-        if type(value) is not int:
+        if not isinstance(value, int):
             raise TypeError("Age must be a number!")
         if value <= 0:
             raise ValueError("Age must be greater than 0!")
