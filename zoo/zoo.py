@@ -85,7 +85,7 @@ class LengthDescriptor(object):
         return self.length
 
 
-class Feline(object):
+class FelineMixin(object):
     def __init__(self, zoo):
         self.zoo = zoo
         self.family = "Feline"
@@ -112,7 +112,7 @@ class Feline(object):
         pass
 
 
-class Canine(object):
+class CanineMixin(object):
     def __init__(self, zoo):
         self._age = None
         self.zoo = zoo
