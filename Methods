@@ -1,0 +1,118 @@
+Метод get класса ProcessFormView обрабатывает запросы GET:
+return self.render_to_response(self.get_context_data())
+1) метод get_context_data класса FormMixin вставляет форму в словарь
+           if 'form' not in kwargs:
+               kwargs['form'] = self.get_form()
+           return super(FormMixin, self).get_context_data(**kwargs)
+      1.1) метод get_form класса FormMixin возвращает экземпляр формы
+                if form_class is None:
+                    form_class = self.get_form_class()
+                return form_class(**self.get_form_kwargs())
+            1.1.1) метод get_form_class класса FormMixin возвращает класс формы
+                    return self.form_class
+            1.1.2) метод get_form_kwargs класса FormMixin возвращает аргументы для создания экземпляра формы
+                    kwargs = {
+                        'initial': self.get_initial(),
+                        'prefix': self.get_prefix(),
+                    }
+                    if self.request.method in ('POST', 'PUT'):
+                        kwargs.update({
+                            'data': self.request.POST,
+                            'files': self.request.FILES,
+                        })
+                    return kwargs
+                  1.1.2.1) метод get_initial класса FormMixin возвращает исходные данные для использования для форм на этом представлении.
+                                  return self.initial.copy()
+                  1.1.2.2) метод get_prefix класса FormMixin возвращает префикс для использования для форм в этом представлении
+                          return self.prefix
+      1.2) метод get_context_data класса ContextMixin вставляет представление в словарь
+              if 'view' not in kwargs:
+                  kwargs['view'] = self
+              return kwargs
+2) метод render_to_response класса TemplateResponseMixin возвращает ответ, по “response_class”
+        response_kwargs.setdefault('content_type', self.content_type)
+        return self.response_class(
+            request=self.request,
+            template=self.get_template_names(),
+            context=context,
+            using=self.template_engine,
+            **response_kwargs
+        )
+      2.1) метод get_template_names класса TemplateResponseMixin возвращает список имен шаблонов, которые будут использоваться для запроса
+              if self.template_name is None:
+                  raise ImproperlyConfigured(
+                      "TemplateResponseMixin requires either a definition of "
+                      "'template_name' or an implementation of 'get_template_names()'")
+              else:
+                  return [self.template_name]
+
+
+Метод post класса ProcessFormView обрабатывает запросы POST, создавая экземпляр формы с переданным данными и проверяет их
+form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+1) метод get_form класса FormMixin возвращает экземпляр формы
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(**self.get_form_kwargs())
+      1.1) метод get_form_class класса FormMixin возвращает класс формы
+      return self.form_class
+      1.2) метод get_form_kwargs класса FormMixin возвращает аргументы для создания экземпляра формы
+              kwargs = {
+                  'initial': self.get_initial(),
+                  'prefix': self.get_prefix(),
+              }
+              if self.request.method in ('POST', 'PUT'):
+                  kwargs.update({
+                      'data': self.request.POST,
+                      'files': self.request.FILES,
+                  })
+              return kwargs
+            1.2.1) метод get_initial класса FormMixin возвращает исходные данные для использования для форм на этом представлении.
+                            return self.initial.copy()
+            1.2.2) метод get_prefix класса FormMixin возвращает префикс для использования для форм в этом представлении
+                    return self.prefix
+2) метод is_valid класса BaseForm возвращает True если нет ошибок, иначе False
+        return self.is_bound and not self.errors
+3) метод form_valid класса FormMixin если форма валидна, переадресовывает на указанный URL.
+        return HttpResponseRedirect(self.get_success_url())
+      3.1) метод get_success_url класса FormMixin возвращает заданный URL-адрес
+              if self.success_url:
+                  url = force_text(self.success_url)
+              else:
+                  raise ImproperlyConfigured(
+                      "No URL to redirect to. Provide a success_url.")
+              return url
+4) метод form_invalid класса FormMixin если форма не валидна, повторно отображает данные и ошибки
+        return self.render_to_response(self.get_context_data(form=form))
+      4.1) метод get_context_data класса FormMixin вставляет форму в словарь
+                 if 'form' not in kwargs:
+                     kwargs['form'] = self.get_form()
+                 return super(FormMixin, self).get_context_data(**kwargs)
+            4.1.1) метод get_form класса FormMixin возвращает экземпляр формы
+                      if form_class is None:
+                          form_class = self.get_form_class()
+                      return form_class(**self.get_form_kwargs())
+                  4.1.1.1) метод get_form_class класса FormMixin возвращает класс формы
+                          return self.form_class
+                  4.1.1.2) метод get_form_kwargs класса FormMixin возвращает аргументы для создания экземпляра формы
+                          kwargs = {
+                              'initial': self.get_initial(),
+                              'prefix': self.get_prefix(),
+                          }
+                          if self.request.method in ('POST', 'PUT'):
+                              kwargs.update({
+                                  'data': self.request.POST,
+                                  'files': self.request.FILES,
+                              })
+                          return kwargs
+                        4.1.1.2.1) метод get_initial класса FormMixin возвращает исходные данные для использования для форм на этом представлении.
+                                        return self.initial.copy()
+                        4.1.1.2.2) метод get_prefix класса FormMixin возвращает префикс для использования для форм в этом представлении
+                                return self.prefix
+            4.1.2) метод get_context_data класса ContextMixin вставляет представление в словарь
+                    if 'view' not in kwargs:
+                        kwargs['view'] = self
+                    return kwargs
