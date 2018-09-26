@@ -116,3 +116,6 @@ form = self.get_form()
                     if 'view' not in kwargs:
                         kwargs['view'] = self
                     return kwargs
+
+метод get_object класса SingleObjectMixin возвращает объект
+метод get_queryset класса SingleObjectMixin возвращает "QuerySet", который будет использоваться для поиска объекта
